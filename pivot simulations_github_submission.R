@@ -86,8 +86,8 @@ EstMSFEagg=sum(cov(as.matrix(res_clusters)))
 EstMSFEagg
 
 
-#################### 50 iterations from different random group assignments: ###############
-n.clusters=4
+#################### 50 iterations from different random group assignments to 4 clusters: ###############
+n.clusters=4 ## This can be changed for any number of clusters
 RandGroupsList=list()
 
 TrueMSFEsub.rand=c()
@@ -99,9 +99,15 @@ EstMSFEsub.piv=c()
 EstGroup.piv=list()
 
 start=proc.time()
-for(k in 1:2){ ## 1:50 MAKE THIS LARGER
+for(k in 1:50){
+  
+  ### At each iteration streams are assigned to clusters randomly and TRUE and ESTIMATED MSFE is computed based on the clusters.
+  ### For each random assignment, the pivot algorithm is then used to determine better clusters and compute the TRUE and ESTIMATED MSFE for the final cluster assignments.
+  ### The results of random clustering are saved in TRUEMSFEsub.rand and EstMSFEsub.rand
+  ### The results of pivot clustering are saved in TrueMSFEsub.piv and EstMSFEsub.piv
+  
   RandGroups=sample(1:n.clusters,nstreams,replace=TRUE)
-  RandGroupsList[[k]]=RandGroups
+  RandGroupsList[[k]]=RandGroups 
   NewRandMSFEtrue=MSFEsubaggTRUE(phi_list,theta_list,covarmat,RandGroups)
   TrueMSFEsub.rand=c(TrueMSFEsub.rand,NewRandMSFEtrue)
   
@@ -114,7 +120,7 @@ for(k in 1:2){ ## 1:50 MAKE THIS LARGER
   NewRandMSFEest=sum(cov(as.matrix(res_clusters)))
   EstMSFEsub.rand=c(EstMSFEsub.rand,NewRandMSFEest)
   
-  #### Local minimum (TRUE MSFE):   ### may be a problem on next line: sum(cov(res_clusters)) is estimated MSFE!
+  #### Local minimum (TRUE MSFE): 
   pivold=pivotMSFE_TRUE(phi_list,theta_list,covarmat,NewRandMSFEtrue,RandGroups,unfin.clust=1:max(RandGroups)) ## MSFE of latest random: sum(cov(res_clusters))
   newMSFE_true=pivold[[2]]
   newGroups=pivold[[1]]
