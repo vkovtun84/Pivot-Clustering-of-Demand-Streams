@@ -4,6 +4,8 @@ library(matrixcalc)
 library(tseries)
 library(polynom)
 library(PolynomF)
+library(TSclust)
+
 
 nstreams=25 ## number of streams.
 ## Simulating ARMA model coefficients. All streams are ARMA(1,1)
@@ -63,8 +65,25 @@ shocks=SIM$noise
 ShockData=shocks$w
 ShockCOV=var(ShockData) 
 sum(ShockCOV)
-############################
+##############################################
+#### Heirarchical clustering of time-series using AR.PIC and AR.LPC.CEPS distance measures:
 
+diss=diss(t(ProcessData),METHOD="AR.PIC")
+Clusters=hclust(diss,method="average")
+AR.PIC.Groups=cutree(Clusters,k=4)
+AR.PIC.Groups
+AR.PIC.MSFE=MSFEsubaggTRUE(phi_list,theta_list,covarmat,AR.PIC.Groups)
+AR.PIC.MSFE
+
+diss=diss(t(ProcessData),METHOD="AR.LPC.CEPS")
+Clusters=hclust(diss,method="average")
+AR.LPC.CEPS.Groups=cutree(Clusters,k=4)
+AR.LPC.CEPS.Groups
+AR.LPC.CEPS.MSFE=MSFEsubaggTRUE(phi_list,theta_list,covarmat,AR.LPC.CEPS.Groups)
+AR.LPC.CEPS.MSFE
+
+###########################
+############### Estimated MSFEs based on fully disaggregating streams and fully aggregating streams:
 
 res_clusters=c()
 order=c(1,0,1)
@@ -85,8 +104,7 @@ for(i in 1:ncol(ClData)) res_clusters=cbind(res_clusters,arima(ClData[,i],order=
 EstMSFEagg=sum(cov(as.matrix(res_clusters)))
 EstMSFEagg
 
-
-#################### 50 iterations from different random group assignments to 4 clusters: ###############
+#################################Simulation of 50 random initializations of Pivot Algorithm for 4 clusters:
 n.clusters=4 ## This can be changed for any number of clusters
 RandGroupsList=list()
 
@@ -165,6 +183,13 @@ EstGroup.piv
 
 ## Compare to True Disaggregated MSFE:
 TrueMSFEind
+TrueMSFEagg
+
+EstMSFEind
+EstMSFEagg
+
+MSFEresults=data.frame(TrueMSFEsub.piv,TrueMSFEsub.rand,EstMSFEsub.piv,EstMSFEsub.rand)
+write.csv(MSFEresults,"C:/Users/kovtu/OneDrive/Desktop/Research/Research post May 2016/Shridar Aggregate Evaluation/MSFEresults.csv")
 
 
 ########### The smallest MSFE groups found in both:
@@ -217,6 +242,7 @@ Clusters=hclust(as.dist(dist_est),method="complete")
 Est_Fin_clust=cutree(Clusters,k=4)
 
 True_Fin_clust
+
 Est_Fin_clust
 
 
@@ -239,8 +265,22 @@ Est_Fin_clust
 (1:nstreams)[simmat_est[,5]>15]     
 
 
-##########################################
-################################################# Use this:
+#################
+### Model coefficients used in the simulations:
+
+Models=data.frame()
+
+for(k in 1:25){
+  
+  Models[k,1]=phi_list[[k]][2]
+  Models[k,2]=theta_list[[k]][2]
+  
+}
+
+colnames(Models)=c("phi_1","theta_1")
+
+write.csv(Models,"C:/Users/kovtu/OneDrive/Desktop/Research/Research post May 2016/Shridar Aggregate Evaluation/Models.csv")
+write.csv(covarmat,"C:/Users/kovtu/OneDrive/Desktop/Research/Research post May 2016/Shridar Aggregate Evaluation/covarmat.csv")
 
 
 
