@@ -7,7 +7,7 @@ library(PolynomF)
 library(TSclust)
 
 
-nstreams=25 ## number of streams.
+nstreams=20 ## number of streams.
 ## Simulating ARMA model coefficients. All streams are ARMA(1,1)
 phi_list=list()
 theta_list=list()
@@ -26,7 +26,7 @@ while(!is.positive.definite(covarmat)){
   A <- matrix(runif(n^2)*2-1, ncol=n) 
   covarmat <- t(A) %*% A
 }
-
+is.positive.definite(covarmat)
 ####################
 
 TrueMSFEind=sum(covarmat) ## MSFE when using individual streams with TRUE ARMA coefficients.
@@ -117,7 +117,7 @@ EstMSFEsub.piv=c()
 EstGroup.piv=list()
 
 start=proc.time()
-for(k in 1:50){
+for(k in 1:10){
   
   ### At each iteration streams are assigned to clusters randomly and TRUE and ESTIMATED MSFE is computed based on the clusters.
   ### For each random assignment, the pivot algorithm is then used to determine better clusters and compute the TRUE and ESTIMATED MSFE for the final cluster assignments.
@@ -189,7 +189,12 @@ EstMSFEind
 EstMSFEagg
 
 MSFEresults=data.frame(TrueMSFEsub.piv,TrueMSFEsub.rand,EstMSFEsub.piv,EstMSFEsub.rand)
-write.csv(MSFEresults,"C:/Users/kovtu/OneDrive/Desktop/Research/Research post May 2016/Shridar Aggregate Evaluation/MSFEresults.csv")
+
+TrueMSFEind
+TrueMSFEagg
+plot(TrueMSFEsub.piv,ylim=c(200,400),pch=16)
+
+plot()
 
 
 ########### The smallest MSFE groups found in both:
@@ -267,20 +272,6 @@ Est_Fin_clust
 
 #################
 ### Model coefficients used in the simulations:
-
-Models=data.frame()
-
-for(k in 1:25){
-  
-  Models[k,1]=phi_list[[k]][2]
-  Models[k,2]=theta_list[[k]][2]
-  
-}
-
-colnames(Models)=c("phi_1","theta_1")
-
-write.csv(Models,"C:/Users/kovtu/OneDrive/Desktop/Research/Research post May 2016/Shridar Aggregate Evaluation/Models.csv")
-write.csv(covarmat,"C:/Users/kovtu/OneDrive/Desktop/Research/Research post May 2016/Shridar Aggregate Evaluation/covarmat.csv")
 
 
 
